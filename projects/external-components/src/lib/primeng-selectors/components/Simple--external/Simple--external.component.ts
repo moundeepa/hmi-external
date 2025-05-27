@@ -1,16 +1,40 @@
 // SimpleComponent: Sudoku game UI with background color customization.
 // Features:
+// - No external libraries or APIs used
 // - Inline HTML & CSS, Angular 18 compatible
 // - Extends CommonExternalComponent
 // - Strict typing for variables
-// - Uses sudoku-gen for puzzle logic (no 'sudoku-umd' dependency)
+// - Generates a fixed valid puzzle and checks solution
 
 import { Component } from '@angular/core';
 import { CommonExternalComponent } from '../common-external/common-external.component';
-import * as sudokuGen from 'sudoku-gen';
 
 type SudokuCell = number | null;
 type SudokuBoard = SudokuCell[][];
+
+const FIXED_PUZZLE: SudokuBoard = [
+  [5, 3, null, null, 7, null, null, null, null],
+  [6, null, null, 1, 9, 5, null, null, null],
+  [null, 9, 8, null, null, null, null, 6, null],
+  [8, null, null, null, 6, null, null, null, 3],
+  [4, null, null, 8, null, 3, null, null, 1],
+  [7, null, null, null, 2, null, null, null, 6],
+  [null, 6, null, null, null, null, 2, 8, null],
+  [null, null, null, 4, 1, 9, null, null, 5],
+  [null, null, null, null, 8, null, null, 7, 9]
+];
+
+const FIXED_SOLUTION: number[][] = [
+  [5,3,4,6,7,8,9,1,2],
+  [6,7,2,1,9,5,3,4,8],
+  [1,9,8,3,4,2,5,6,7],
+  [8,5,9,7,6,1,4,2,3],
+  [4,2,6,8,5,3,7,9,1],
+  [7,1,3,9,2,4,8,5,6],
+  [9,6,1,5,3,7,2,8,4],
+  [2,8,7,4,1,9,6,3,5],
+  [3,4,5,2,8,6,1,7,9]
+];
 
 @Component({
   selector: 'simple',
@@ -49,7 +73,6 @@ export class SimpleComponent extends CommonExternalComponent {
   board: SudokuBoard;
   initialBoard: SudokuBoard;
   message: string = '';
-  private solution: number[][] = [];
 
   constructor() {
     super();
@@ -59,22 +82,9 @@ export class SimpleComponent extends CommonExternalComponent {
   }
 
   generateNewPuzzle(): void {
-    const { puzzle, solution } = sudokuGen.generate('easy');
-    this.solution = solution;
-    this.board = [];
-    this.initialBoard = [];
-
-    for (let i = 0; i < 9; i++) {
-      const boardRow: SudokuCell[] = [];
-      const initialRow: SudokuCell[] = [];
-      for (let j = 0; j < 9; j++) {
-        const val: SudokuCell = puzzle[i][j] === 0 ? null : puzzle[i][j];
-        boardRow.push(val);
-        initialRow.push(val);
-      }
-      this.board.push(boardRow);
-      this.initialBoard.push(initialRow);
-    }
+    // Deep copy to avoid mutation
+    this.board = FIXED_PUZZLE.map((row: SudokuCell[]) => row.slice());
+    this.initialBoard = FIXED_PUZZLE.map((row: SudokuCell[]) => row.slice());
     this.message = '';
   }
 
@@ -95,7 +105,7 @@ export class SimpleComponent extends CommonExternalComponent {
     let correct: boolean = true;
     for (let i = 0; i < 9 && correct; i++) {
       for (let j = 0; j < 9 && correct; j++) {
-        if ((this.board[i][j] ?? 0) !== this.solution[i][j]) {
+        if ((this.board[i][j] ?? 0) !== FIXED_SOLUTION[i][j]) {
           correct = false;
         }
       }
